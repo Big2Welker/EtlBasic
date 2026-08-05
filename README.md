@@ -590,9 +590,13 @@ Los requisitos definidos en el Laboratorio 1A fueron la base para el diseño del
 Cada etapa cumple una función distinta dentro del proceso ETL:
 
 Perfilamiento: consiste en analizar la calidad de los datos antes de modificarlos. En esta etapa se identificaron valores faltantes, registros duplicados, formatos inconsistentes, tipos de datos incorrectos y valores inválidos.
+
 Limpieza: corrige los problemas detectados durante el perfilamiento. Se estandarizaron identificadores, formatos de texto y fechas, se convirtieron datos numéricos, se eliminaron registros inválidos y duplicados y se normalizaron los códigos de promoción.
+
 Transformación: integra la información de las diferentes tablas maestras y genera nuevos atributos necesarios para el análisis, como ventas brutas, descuentos, ventas netas, nombre del producto, información de la tienda y metas mensuales.
+
 Validación: verifica que el resultado final cumpla las reglas de calidad definidas por el negocio antes de realizar la carga. Si alguna validación crítica falla, el proceso se detiene para evitar cargar información incorrecta.
+
 3. ¿Por qué fue necesario diseñar el sistema como bloques antes de programar?
 
 Diseñar el sistema en bloques permitió separar responsabilidades dentro del pipeline, facilitando el desarrollo, las pruebas y el mantenimiento del código. Cada módulo realiza una tarea específica (extracción, perfilamiento, limpieza, transformación, validación, carga y consultas), lo que hace que el sistema sea más organizado, reutilizable y fácil de modificar sin afectar las demás etapas.
