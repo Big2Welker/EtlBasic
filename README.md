@@ -608,6 +608,7 @@ El bloque de Extracción (Extract) sería el más afectado, ya que es el encarga
 5. ¿El equipo construyó un pipeline ETL o construyó un sistema para resolver un problema de negocio? Expliquen.
 
 Aunque técnicamente se implementó un pipeline ETL, el resultado final corresponde a un sistema orientado a resolver un problema de negocio. El objetivo no fue únicamente mover y transformar datos, sino generar información útil para apoyar la toma de decisiones mediante indicadores y consultas analíticas. El pipeline ETL es el mecanismo que permite integrar y preparar los datos, mientras que el sistema completo entrega resultados que responden directamente a los requerimientos del negocio, como el desempeño de productos, el cumplimiento de metas por tienda, las tendencias de ventas y el impacto de las promociones.
+
 ---
 
 # Autores
