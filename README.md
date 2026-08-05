@@ -580,7 +580,30 @@ Bogotá
 Cali
 Medellín
 ```
+Actividad 12 – Preguntas de reflexión
+1. ¿Cómo influyeron los requisitos del Laboratorio 1A en el diseño del pipeline?
 
+Los requisitos definidos en el Laboratorio 1A fueron la base para el diseño del pipeline ETL, ya que permitieron identificar qué información era necesaria para responder las preguntas de negocio planteadas. A partir de esos requisitos se determinó qué fuentes de datos integrar, qué columnas debían generarse durante la transformación y qué consultas analíticas debían implementarse. En consecuencia, cada etapa del pipeline fue diseñada para producir un conjunto de datos que satisficiera las necesidades de análisis del negocio.
+
+2. ¿Cuál es la diferencia entre perfilamiento, limpieza, transformación y validación en su implementación?
+
+Cada etapa cumple una función distinta dentro del proceso ETL:
+
+Perfilamiento: consiste en analizar la calidad de los datos antes de modificarlos. En esta etapa se identificaron valores faltantes, registros duplicados, formatos inconsistentes, tipos de datos incorrectos y valores inválidos.
+Limpieza: corrige los problemas detectados durante el perfilamiento. Se estandarizaron identificadores, formatos de texto y fechas, se convirtieron datos numéricos, se eliminaron registros inválidos y duplicados y se normalizaron los códigos de promoción.
+Transformación: integra la información de las diferentes tablas maestras y genera nuevos atributos necesarios para el análisis, como ventas brutas, descuentos, ventas netas, nombre del producto, información de la tienda y metas mensuales.
+Validación: verifica que el resultado final cumpla las reglas de calidad definidas por el negocio antes de realizar la carga. Si alguna validación crítica falla, el proceso se detiene para evitar cargar información incorrecta.
+3. ¿Por qué fue necesario diseñar el sistema como bloques antes de programar?
+
+Diseñar el sistema en bloques permitió separar responsabilidades dentro del pipeline, facilitando el desarrollo, las pruebas y el mantenimiento del código. Cada módulo realiza una tarea específica (extracción, perfilamiento, limpieza, transformación, validación, carga y consultas), lo que hace que el sistema sea más organizado, reutilizable y fácil de modificar sin afectar las demás etapas.
+
+4. ¿Qué bloque se vería más afectado si una sucursal cambiara su formato de archivo?
+
+El bloque de Extracción (Extract) sería el más afectado, ya que es el encargado de leer cada fuente de datos y convertirla al esquema común utilizado por el resto del pipeline. Si una sucursal cambiara, por ejemplo, de XML a Excel o modificara la estructura de sus archivos, únicamente sería necesario actualizar la lógica de extracción para esa fuente, mientras que las etapas de limpieza, transformación, validación y carga podrían mantenerse sin cambios.
+
+5. ¿El equipo construyó un pipeline ETL o construyó un sistema para resolver un problema de negocio? Expliquen.
+
+Aunque técnicamente se implementó un pipeline ETL, el resultado final corresponde a un sistema orientado a resolver un problema de negocio. El objetivo no fue únicamente mover y transformar datos, sino generar información útil para apoyar la toma de decisiones mediante indicadores y consultas analíticas. El pipeline ETL es el mecanismo que permite integrar y preparar los datos, mientras que el sistema completo entrega resultados que responden directamente a los requerimientos del negocio, como el desempeño de productos, el cumplimiento de metas por tienda, las tendencias de ventas y el impacto de las promociones.
 ---
 
 # Autores
