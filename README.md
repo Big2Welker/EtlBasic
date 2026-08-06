@@ -1,22 +1,24 @@
-# ETL Pipeline - Retail Analytics (Laboratorio 1B)
+# ETL Pipeline - Retail Analytics (Lab 1B)
 
 Sebastian Rojas Herrera, Juan David Bedoya
 
-## Descripción general
+---
 
-Este proyecto implementa un pipeline ETL (Extract, Transform and Load) para integrar información de ventas provenientes de tres sucursales de una empresa de retail.
+## Overview
 
-Las transacciones son extraídas desde archivos en diferentes formatos (CSV, JSON y XML), posteriormente se perfilan, limpian, transforman, validan y finalmente se cargan en un archivo CSV integrado y en una base de datos SQLite.
+This project implements an ETL (Extract, Transform, and Load) pipeline to integrate sales information from three branches of a retail company.
 
-Finalmente se ejecutan consultas analíticas que permiten responder los requisitos de negocio definidos en el Laboratorio 1A.
+Transactions are extracted from files in different formats (CSV, JSON, and XML). The data is then profiled, cleaned, transformed, validated, and finally loaded into an integrated CSV file and a SQLite database.
+
+Finally, analytical queries are executed to answer the business requirements defined in Laboratory 1A.
 
 ---
 
-# Arquitectura del sistema
+# System Architecture
 
-```
+```text
                     +-------------------------+
-                    |     Datos de entrada    |
+                    |      Input Data         |
                     +-------------------------+
                     | sales_cali.csv          |
                     | sales_bogota.json       |
@@ -29,91 +31,91 @@ Finalmente se ejecutan consultas analíticas que permiten responder los requisit
                                  |
                                  v
                       +--------------------+
-                      |    EXTRACCIÓN      |
+                      |     EXTRACTION     |
                       +--------------------+
                                  |
                                  v
                       +--------------------+
-                      |   PERFILAMIENTO    |
+                      |     PROFILING      |
                       +--------------------+
                                  |
                                  v
                       +--------------------+
-                      | LIMPIEZA Y         |
-                      | ARMONIZACIÓN       |
+                      | CLEANING &         |
+                      | HARMONIZATION      |
                       +--------------------+
                                  |
                                  v
                       +--------------------+
-                      | TRANSFORMACIÓN     |
-                      | E INTEGRACIÓN      |
+                      | TRANSFORMATION &   |
+                      | INTEGRATION        |
                       +--------------------+
                                  |
                                  v
                       +--------------------+
-                      |   VALIDACIÓN       |
+                      |    VALIDATION      |
                       +--------------------+
                                  |
                                  v
                       +--------------------+
-                      |      CARGA         |
+                      |      LOADING       |
                       +--------------------+
                            |           |
                            |           |
                            v           v
-                 integrated_sales.csv
-                      retail_analytics.db
+                integrated_sales.csv
+                   retail_analytics.db
                            |
                            v
-                 Consultas Analíticas
+                  Analytical Queries
 ```
 
 ---
 
-# Requisitos de negocio implementados
+# Implemented Business Requirements
 
-El sistema permite responder los siguientes requisitos de negocio:
+The system answers the following business questions:
 
-- Ingresos totales del negocio.
-- Productos con menor rendimiento.
-- Cumplimiento de metas por tienda.
-- Impacto de campañas promocionales.
-- Tendencias temporales de ventas.
-- Comparación de ventas por región.
+- Total business revenue
+- Lowest-performing products
+- Store target achievement
+- Promotional campaign impact
+- Sales trends over time
+- Regional sales comparison
 
 ---
 
-# Descripción del Pipeline ETL
+# ETL Pipeline Description
 
-## 1. Extracción
+## 1. Extraction
 
-La etapa de extracción integra información proveniente de tres formatos distintos:
+The extraction stage integrates information from three different file formats:
 
-- CSV (Sucursal Cali)
-- JSON (Sucursal Bogotá)
-- XML (Sucursal Medellín)
+- CSV (Cali Branch)
+- JSON (Bogotá Branch)
+- XML (Medellín Branch)
 
-Además, se cargan las tablas maestras:
+It also loads the following master tables:
 
 - products.csv
 - stores.csv
 - promotions.csv
 - monthly_targets.csv
 
-Durante esta etapa únicamente se homologa el esquema de columnas; no se realizan modificaciones sobre los datos.
+During this stage, only the column schema is standardized. No modifications are made to the data itself.
 
 ---
 
-## 2. Perfilamiento
+## 2. Profiling
 
-Antes de limpiar los datos se realizó un perfilamiento del conjunto de datos consolidado.
+Before cleaning, a data profiling process was performed on the consolidated dataset.
 
-## Dimensiones
+### Dataset Dimensions
 
-- Registros: **763**
-- Columnas: **8**
+- Records: **763**
+- Columns: **8**
 
-## Columnas
+### Columns
 
 - sale_line_id
 - sale_date
@@ -124,10 +126,10 @@ Antes de limpiar los datos se realizó un perfilamiento del conjunto de datos co
 - promotion_code
 - payment_method
 
-## Tipos de datos encontrados
+### Original Data Types
 
-| Columna | Tipo original |
-|----------|---------------|
+| Column | Original Type |
+|----------|--------------|
 | sale_line_id | str |
 | sale_date | str |
 | store_id | str |
@@ -137,97 +139,98 @@ Antes de limpiar los datos se realizó un perfilamiento del conjunto de datos co
 | promotion_code | str |
 | payment_method | str |
 
-## Valores faltantes
+### Missing Values
 
-| Columna | Faltantes |
-|----------|----------|
+| Column | Missing Values |
+|----------|---------------|
 | promotion_code | 489 |
 
-Las demás columnas no presentaron valores faltantes.
+All other columns contained no missing values.
 
-## Problemas encontrados
+### Identified Issues
 
-### IDs duplicados
+#### Duplicate IDs
 
-Se encontraron **3 registros duplicados** en `sale_line_id`.
+Three duplicate `sale_line_id` records were found.
 
-### Cantidades inválidas
+#### Invalid Quantities
 
-Se detectaron **2 registros** con cantidad menor o igual a cero.
+Two records had quantities less than or equal to zero.
 
-### Precios inválidos
+#### Invalid Prices
 
-Se encontraron **2 registros** con precio inválido.
+Two records contained invalid prices.
 
-Uno de ellos incluía el símbolo `$` y otro tenía un valor negativo.
+One included the `$` symbol, while another contained a negative value.
 
-### Fechas
+#### Dates
 
-Las ventas provenían de tres formatos distintos:
+Sales data came in three different formats:
 
 - YYYY-MM-DD
 - DD/MM/YYYY
 - MM-DD-YYYY
 
-Por esta razón el perfilamiento inicial detectó numerosas fechas inválidas utilizando un único formato de lectura.
+As a result, the initial profiling detected multiple invalid dates when using a single parsing format.
 
-### Valores categóricos inconsistentes
+#### Inconsistent Categorical Values
 
-Se detectaron diferencias de escritura como:
+Examples:
 
-Store ID
+**Store ID**
 
 - S02
 - s02
 
-Product ID
+**Product ID**
 
 - P005
 - " P005"
 
-Payment Method
+**Payment Method**
 
 - Cash
 - CASH
 - card
 
-Promotion Code
+**Promotion Code**
 
 - NaN
 - ""
 - N/A
 
 ---
-## 3. Limpieza y armonización
 
-Las reglas aplicadas fueron definidas únicamente a partir de los resultados obtenidos durante el perfilamiento.
+## 3. Cleaning and Harmonization
 
-## Regla 1
+The cleaning rules were defined exclusively based on the profiling results.
 
-Se estandarizaron los identificadores:
+### Rule 1
+
+Standardize identifiers:
 
 - sale_line_id
 - store_id
 - product_id
 
-Aplicando:
+Actions:
 
-- eliminación de espacios
-- conversión a mayúsculas
+- Remove leading/trailing spaces
+- Convert to uppercase
 
-Justificación:
+Reason:
 
-Existían identificadores escritos como `s02` y `" P005"`.
+Identifiers such as `s02` and `" P005"` were found.
 
 ---
 
-## Regla 2
+### Rule 2
 
-Se normalizaron los textos utilizando Title Case y eliminando espacios.
+Normalize text values using Title Case and remove extra spaces.
 
-Justificación:
+Reason:
 
-Existían valores como:
+Values such as:
 
 - CASH
 - card
@@ -235,60 +238,60 @@ Existían valores como:
 
 ---
 
-## Regla 3
+### Rule 3
 
-Las fechas fueron interpretadas utilizando el formato correspondiente para cada sucursal y convertidas a un único tipo `datetime`.
+Parse dates according to each branch's original format and convert them into a unified `datetime` type.
 
-Justificación:
+Reason:
 
-Cada ciudad utilizaba un formato diferente de fecha.
+Each city used a different date format.
 
 ---
 
-## Regla 4
+### Rule 4
 
-Las columnas
+Convert:
 
 - quantity
 - unit_price
 
-se convirtieron a valores numéricos.
+to numeric values.
 
-Además se eliminó el símbolo `$` presente en algunos precios.
-
----
-
-## Regla 5
-
-Se eliminaron registros duplicados de `sale_line_id`, conservando únicamente la primera ocurrencia.
-
-Justificación:
-
-El perfilamiento encontró tres registros duplicados.
+Additionally, remove the `$` symbol from price values.
 
 ---
 
-## Regla 6
+### Rule 5
 
-Se eliminaron registros con:
+Remove duplicate `sale_line_id` records, keeping only the first occurrence.
 
-- fechas inválidas
+Reason:
+
+Three duplicate IDs were detected during profiling.
+
+---
+
+### Rule 6
+
+Remove records containing:
+
+- Invalid dates
 - quantity ≤ 0
 - unit_price ≤ 0
 
-Justificación:
+Reason:
 
-Estos registros no cumplen las reglas de calidad del negocio.
+These records violate business data quality rules.
 
 ---
 
-## Regla 7
+### Rule 7
 
-Los códigos de promoción faltantes fueron representados de forma consistente utilizando valores nulos (`NaN`).
+Represent missing promotion codes consistently using `NaN`.
 
-Justificación:
+Reason:
 
-Existían distintas representaciones:
+Different missing-value representations existed:
 
 - NaN
 - ""
@@ -296,27 +299,27 @@ Existían distintas representaciones:
 
 ---
 
-## Resultado de la limpieza
+### Cleaning Results
 
-Registros iniciales:
+Initial records:
 
 763
 
-Registros finales:
+Final records:
 
 756
 
-Registros eliminados:
+Removed records:
 
 7
 
 ---
 
-## 4. Transformación e integración
+## 4. Transformation and Integration
 
-Las ventas son enriquecidas mediante la integración con las tablas maestras.
+Sales records are enriched by joining them with the master tables.
 
-Se agregan los siguientes atributos:
+The following attributes are added:
 
 - product_name
 - category
@@ -327,13 +330,13 @@ Se agregan los siguientes atributos:
 - campaign_name
 - sales_target
 
-También se generan nuevas métricas:
+Additional metrics are calculated:
 
 - gross_sales
 - discount_amount
 - net_sales
 
-Y nuevas variables temporales:
+Additional time-based variables:
 
 - month
 - week
@@ -341,85 +344,59 @@ Y nuevas variables temporales:
 
 ---
 
-## 5. Validación
+## 5. Validation
 
-Antes de realizar la carga se verifica que:
+Before loading, the following checks are performed:
 
-- sale_line_id sea único.
-- Los identificadores obligatorios no sean nulos.
-- Las fechas sean válidas.
-- quantity, unit_price, gross_sales y net_sales sean positivos.
-- Todos los productos existan en el maestro.
-- Todas las tiendas existan en el maestro.
-- net_sales sea igual a gross_sales menos discount_amount.
+- sale_line_id is unique
+- Required identifiers are not null
+- Dates are valid
+- quantity, unit_price, gross_sales, and net_sales are positive
+- Products exist in the master table
+- Stores exist in the master table
+- net_sales equals gross_sales minus discount_amount
 
-Si alguna validación falla, el pipeline se detiene y registra el error en el archivo de log.
+If any validation fails, the pipeline stops and logs the error.
 
 ---
 
-## 6. Carga
+## 6. Loading
 
-Los datos procesados se almacenan en:
+Processed data is stored in:
 
-**CSV**
+### CSV
 
 ```
 Data/processed/integrated_sales.csv
 ```
 
-**SQLite**
+### SQLite
 
 ```
 Database/retail_analytics.db
 ```
 
-Tabla creada:
+Created table:
 
 ```
 sales_analytics
 ```
 
-Todas las consultas analíticas leen directamente desde SQLite.
+All analytical queries read directly from SQLite.
 
 ---
 
-# Estructura del proyecto
+# Project Structure
 
-```
+```text
 ETL_Lab1B_Data_Only/
 
-│
 ├── Data/
 │   ├── raw/
-│   │   ├── monthly_targets.csv
-│   │   ├── products.csv
-│   │   ├── promotions.csv
-│   │   ├── sales_bogota.json
-│   │   ├── sales_cali.csv
-│   │   ├── sales_medellin.xml
-│   │   └── stores.csv
-│   │
 │   └── processed/
-│       └── integrated_sales.csv
-│
 ├── Database/
-│   └── retail_analytics.db
-│
 ├── Logs/
-│   └── pipeline.log
-│
 ├── Src/
-│   ├── clean.py
-│   ├── extract.py
-│   ├── load.py
-│   ├── main.py
-│   ├── profiling.py
-│   ├── queries.py
-│   ├── transform.py
-│   ├── validate.py
-│   ├── prueba.py
-│   └── pruebas/
-│
 ├── DATA_DICTIONARY.md
 ├── README.md
 ├── requirements.txt
@@ -428,15 +405,15 @@ ETL_Lab1B_Data_Only/
 
 ---
 
-# Instrucciones de ejecución
+# Execution Instructions
 
-## 1. Clonar el repositorio
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Big2Welker/EtlBasic.git
 ```
 
-Entrar al proyecto
+Enter the project folder:
 
 ```bash
 cd EtlBasic
@@ -444,7 +421,7 @@ cd EtlBasic
 
 ---
 
-## 2. Crear un entorno virtual
+## 2. Create a Virtual Environment
 
 Windows
 
@@ -452,7 +429,7 @@ Windows
 python -m venv .etl
 ```
 
-Activar el entorno
+Activate it:
 
 ```bash
 .etl\Scripts\activate
@@ -460,13 +437,13 @@ Activar el entorno
 
 ---
 
-## 3. Instalar dependencias
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Si no existe el archivo requirements.txt:
+If `requirements.txt` does not exist:
 
 ```bash
 pip install pandas
@@ -474,17 +451,15 @@ pip install pandas
 
 ---
 
-## 4. Ejecutar el pipeline
+## 4. Run the Pipeline
 
-Los scripts fueron desarrollados para ejecutarse **desde la carpeta `Src`**, ya que utilizan rutas relativas hacia las carpetas `Data`, `Database` y `Logs`.
-
-Ingresar a la carpeta:
+The scripts were designed to be executed from the **Src** directory because they use relative paths to the `Data`, `Database`, and `Logs` folders.
 
 ```bash
 cd Src
 ```
 
-Ejecutar:
+Run:
 
 ```bash
 python main.py
@@ -492,19 +467,19 @@ python main.py
 
 ---
 
-Durante la ejecución el sistema realizará automáticamente:
+During execution, the pipeline automatically performs:
 
-1. Extracción.
-2. Perfilamiento.
-3. Limpieza y armonización.
-4. Transformación.
-5. Validación.
-6. Carga.
-7. Consultas analíticas.
+1. Extraction
+2. Profiling
+3. Cleaning and Harmonization
+4. Transformation
+5. Validation
+6. Loading
+7. Analytical Queries
 
 ---
 
-Al finalizar se generarán automáticamente:
+Generated outputs:
 
 - `Data/processed/integrated_sales.csv`
 - `Database/retail_analytics.db`
@@ -512,9 +487,17 @@ Al finalizar se generarán automáticamente:
 
 ---
 
-En la carpeta Src, hay unos .py de pruebas para ejecutar, ejecutarlos dentro de la carpeta Src, con el comando python prueba_nombre_de_la_prueba.py
+Testing scripts are located inside the **Src** folder.
 
-# Tecnologías utilizadas
+Run them using:
+
+```bash
+python test_script_name.py
+```
+
+---
+
+# Technologies Used
 
 - Python 3
 - Pandas
@@ -526,23 +509,23 @@ En la carpeta Src, hay unos .py de pruebas para ejecutar, ejecutarlos dentro de 
 
 ---
 
-# Ejemplos de resultados analíticos
+# Sample Analytical Results
 
-## Ingresos totales
+## Total Revenue
 
-```
-Ventas Brutas:
-$182.609.000
+```text
+Gross Sales:
+$182,609,000
 
-Ventas Netas:
-$180.966.860
+Net Sales:
+$180,966,860
 ```
 
 ---
 
-## Productos con menor rendimiento
+## Lowest-Performing Products
 
-```
+```text
 Digital Scale
 Notebook Pack
 Keyboard Compact
@@ -553,68 +536,77 @@ Bluetooth Speaker
 
 ---
 
-## Cumplimiento de metas
+## Target Achievement
 
-```
-Bogotá Centro      93.69 %
-Cali Norte        117.27 %
-Medellín Poblado  109.13 %
-```
-
----
-
-## Tendencias temporales
-
-```
-Febrero
-Marzo
-Abril
+```text
+Bogotá Centro       93.69%
+Cali Norte         117.27%
+Medellín Poblado   109.13%
 ```
 
 ---
 
-## Ventas por región
+## Sales Trends
 
+```text
+February
+March
+April
 ```
+
+---
+
+## Sales by Region
+
+```text
 Bogotá
 Cali
 Medellín
 ```
-Actividad 12 – Preguntas de reflexión
-1. ¿Cómo influyeron los requisitos del Laboratorio 1A en el diseño del pipeline?
-
-Los requisitos definidos en el Laboratorio 1A fueron la base para el diseño del pipeline ETL, ya que permitieron identificar qué información era necesaria para responder las preguntas de negocio planteadas. A partir de esos requisitos se determinó qué fuentes de datos integrar, qué columnas debían generarse durante la transformación y qué consultas analíticas debían implementarse. En consecuencia, cada etapa del pipeline fue diseñada para producir un conjunto de datos que satisficiera las necesidades de análisis del negocio.
-
-2. ¿Cuál es la diferencia entre perfilamiento, limpieza, transformación y validación en su implementación?
-
-Cada etapa cumple una función distinta dentro del proceso ETL:
-
-Perfilamiento: consiste en analizar la calidad de los datos antes de modificarlos. En esta etapa se identificaron valores faltantes, registros duplicados, formatos inconsistentes, tipos de datos incorrectos y valores inválidos.
-
-Limpieza: corrige los problemas detectados durante el perfilamiento. Se estandarizaron identificadores, formatos de texto y fechas, se convirtieron datos numéricos, se eliminaron registros inválidos y duplicados y se normalizaron los códigos de promoción.
-
-Transformación: integra la información de las diferentes tablas maestras y genera nuevos atributos necesarios para el análisis, como ventas brutas, descuentos, ventas netas, nombre del producto, información de la tienda y metas mensuales.
-
-Validación: verifica que el resultado final cumpla las reglas de calidad definidas por el negocio antes de realizar la carga. Si alguna validación crítica falla, el proceso se detiene para evitar cargar información incorrecta.
-
-3. ¿Por qué fue necesario diseñar el sistema como bloques antes de programar?
-
-Diseñar el sistema en bloques permitió separar responsabilidades dentro del pipeline, facilitando el desarrollo, las pruebas y el mantenimiento del código. Cada módulo realiza una tarea específica (extracción, perfilamiento, limpieza, transformación, validación, carga y consultas), lo que hace que el sistema sea más organizado, reutilizable y fácil de modificar sin afectar las demás etapas.
-
-4. ¿Qué bloque se vería más afectado si una sucursal cambiara su formato de archivo?
-
-El bloque de Extracción (Extract) sería el más afectado, ya que es el encargado de leer cada fuente de datos y convertirla al esquema común utilizado por el resto del pipeline. Si una sucursal cambiara, por ejemplo, de XML a Excel o modificara la estructura de sus archivos, únicamente sería necesario actualizar la lógica de extracción para esa fuente, mientras que las etapas de limpieza, transformación, validación y carga podrían mantenerse sin cambios.
-
-5. ¿El equipo construyó un pipeline ETL o construyó un sistema para resolver un problema de negocio? Expliquen.
-
-Aunque técnicamente se implementó un pipeline ETL, el resultado final corresponde a un sistema orientado a resolver un problema de negocio. El objetivo no fue únicamente mover y transformar datos, sino generar información útil para apoyar la toma de decisiones mediante indicadores y consultas analíticas. El pipeline ETL es el mecanismo que permite integrar y preparar los datos, mientras que el sistema completo entrega resultados que responden directamente a los requerimientos del negocio, como el desempeño de productos, el cumplimiento de metas por tienda, las tendencias de ventas y el impacto de las promociones.
 
 ---
 
-# Autores
+# Reflection Questions
+
+## 1. How did the Laboratory 1A requirements influence the pipeline design?
+
+The Laboratory 1A requirements served as the foundation for designing the ETL pipeline. They defined the business questions to answer, which determined the required data sources, transformations, and analytical queries. Each pipeline stage was designed to produce a dataset capable of supporting business decision-making.
+
+---
+
+## 2. What is the difference between profiling, cleaning, transformation, and validation?
+
+- **Profiling:** Analyzes data quality before any modifications.
+- **Cleaning:** Corrects issues identified during profiling.
+- **Transformation:** Integrates data and generates new business attributes and metrics.
+- **Validation:** Ensures the final dataset complies with business quality rules before loading.
+
+---
+
+## 3. Why was it necessary to design the system in blocks before coding?
+
+Designing the pipeline in modular blocks separated responsibilities, making development, testing, and maintenance easier. Each module performs a single task, improving organization, reusability, and scalability.
+
+---
+
+## 4. Which module would be most affected if a branch changed its file format?
+
+The **Extraction** module would be the most affected because it is responsible for reading and standardizing input files. The remaining ETL stages could remain unchanged.
+
+---
+
+## 5. Did the team build an ETL pipeline or a business solution?
+
+Technically, the project implements an ETL pipeline. However, its ultimate goal is to solve a business problem by providing reliable analytical information for decision-making. The ETL process is the mechanism, while the complete system delivers meaningful business insights.
+
+---
+
+# Authors
+
 Sebastian Rojas Herrera
+
 Juan David Bedoya
 
-Laboratorio 1B - Ingeniería de Datos
+**Data Engineering Laboratory 1B**
 
-Proyecto académico desarrollado para la implementación de un pipeline ETL utilizando Python y SQLite.
+Academic project developed to implement an ETL pipeline using Python and SQLite.
