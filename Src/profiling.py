@@ -43,16 +43,39 @@ def profile_transactions(df):
 
     for column, amount in missing.items():
         print(f"{column}: {amount}")
-
     # --------------------------------------------------------
     # 5. Sale_line_id duplicados
     # --------------------------------------------------------
     print("\n5. DUPLICADOS DE sale_line_id")
     print("-" * 60)
 
-    duplicated_ids = df["sale_line_id"].duplicated().sum()
+    # Obtiene todas las filas cuyo sale_line_id aparece más de una vez
+    duplicated = df[df["sale_line_id"].duplicated(keep=False)]
+
+    # Cuenta cuántos IDs están duplicados
+    duplicated_ids = duplicated["sale_line_id"].nunique()
 
     print(f"Registros duplicados: {duplicated_ids}")
+
+    if not duplicated.empty:
+        print("\nRegistros encontrados:")
+
+        print(
+            duplicated[
+                [
+                    "sale_line_id",
+                    "sale_date",
+                    "store_id",
+                    "product_id",
+                    "quantity",
+                    "unit_price",
+                    "promotion_code",
+                    "payment_method"
+                ]
+            ]
+            .sort_values("sale_line_id")
+            .to_string(index=False)
+        )
 
     # --------------------------------------------------------
     # 6. Cantidades inválidas
